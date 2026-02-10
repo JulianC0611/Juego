@@ -3,80 +3,118 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Un pequeño juego</title>
 
 <style>
-    body{
-        margin:0;
-        background:black;
-        overflow:hidden;
-        font-family:Arial;
-        color:white;
-        text-align:center;
-    }
+body{
+    margin:0;
+    background:black;
+    font-family:Arial;
+    color:white;
+    text-align:center;
+}
 
-    canvas{
-        display:block;
-        margin:auto;
-        background:#050510;
-        border:2px solid #444;
-    }
+canvas{
+    display:block;
+    margin:auto;
+    background:#050510;
+    border:2px solid #444;
+}
 
-    #mensaje{
-        position:absolute;
-        top:50%;
-        left:50%;
-        transform:translate(-50%,-50%);
-        font-size:28px;
-        display:none;
-    }
+#mensaje{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:24px;
+    display:none;
+    background:rgba(0,0,0,0.8);
+    padding:20px;
+    border-radius:10px;
+}
+
+/* Controles táctiles */
+#controles{
+    position:fixed;
+    bottom:20px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.boton{
+    width:70px;
+    height:70px;
+    background:#222;
+    color:white;
+    font-size:26px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    user-select:none;
+    touch-action:none;
+}
+
+.boton:active{
+    background:#555;
+}
 </style>
 
 </head>
 
 <body>
 
-<h2>Usa las flechas del teclado ↑ ↓ ← →</h2>
+<h3>Llega hasta el corazón ❤️</h3>
 <canvas id="juego" width="600" height="400"></canvas>
 
 <div id="mensaje">
     ❤️<br><br>
-    Me gustas mucho<br>
-    ademas que me haces tan feliz<br>
-    que hice este jueguito en lo que ibas a cenar<br>
-    a demas con el tiempo lo ire mejorando<br>
+    Si llegaste hasta aquí…<br>
+    es porque quería que encontraras esto:<br><br>
+    Me gustas muchísimo.
+</div>
+
+<div id="controles">
+    <div class="boton" id="up">↑</div>
+    <div class="boton" id="left">←</div>
+    <div class="boton" id="down">↓</div>
+    <div class="boton" id="right">→</div>
 </div>
 
 <script>
-
 const canvas = document.getElementById("juego");
 const ctx = canvas.getContext("2d");
 
-let jugador = {
-    x:50,
-    y:180,
-    size:20,
-    speed:4
-};
+let jugador = {x:50,y:180,size:20,speed:4};
+let corazon = {x:520,y:180,size:20};
 
-let corazon = {
-    x:520,
-    y:180,
-    size:20
-};
+let keys={};
 
-let keys = {};
+// teclado PC
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
 
-document.addEventListener("keydown", e => keys[e.key]=true);
-document.addEventListener("keyup", e => keys[e.key]=false);
+// controles táctiles
+function touch(id,key){
+    const btn=document.getElementById(id);
+    btn.addEventListener("touchstart",()=>keys[key]=true);
+    btn.addEventListener("touchend",()=>keys[key]=false);
+}
+
+touch("up","ArrowUp");
+touch("down","ArrowDown");
+touch("left","ArrowLeft");
+touch("right","ArrowRight");
 
 function mover(){
-    if(keys["ArrowUp"]) jugador.y -= jugador.speed;
-    if(keys["ArrowDown"]) jugador.y += jugador.speed;
-    if(keys["ArrowLeft"]) jugador.x -= jugador.speed;
-    if(keys["ArrowRight"]) jugador.x += jugador.speed;
+    if(keys["ArrowUp"]) jugador.y-=jugador.speed;
+    if(keys["ArrowDown"]) jugador.y+=jugador.speed;
+    if(keys["ArrowLeft"]) jugador.x-=jugador.speed;
+    if(keys["ArrowRight"]) jugador.x+=jugador.speed;
 
-    // límites pantalla
     if(jugador.x<0) jugador.x=0;
     if(jugador.y<0) jugador.y=0;
     if(jugador.x>canvas.width-jugador.size) jugador.x=canvas.width-jugador.size;
@@ -91,22 +129,21 @@ function dibujarJugador(){
 function dibujarCorazon(){
     ctx.fillStyle="red";
     ctx.beginPath();
-    ctx.arc(corazon.x, corazon.y, 10, 0, Math.PI*2);
+    ctx.arc(corazon.x,corazon.y,10,0,Math.PI*2);
     ctx.fill();
 }
 
 function colision(){
     return(
-        jugador.x < corazon.x+10 &&
-        jugador.x+jugador.size > corazon.x-10 &&
-        jugador.y < corazon.y+10 &&
-        jugador.y+jugador.size > corazon.y-10
+        jugador.x<corazon.x+10 &&
+        jugador.x+jugador.size>corazon.x-10 &&
+        jugador.y<corazon.y+10 &&
+        jugador.y+jugador.size>corazon.y-10
     );
 }
 
 function juego(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
     mover();
     dibujarJugador();
     dibujarCorazon();
@@ -117,9 +154,7 @@ function juego(){
 
     requestAnimationFrame(juego);
 }
-
 juego();
-
 </script>
 
 </body>
