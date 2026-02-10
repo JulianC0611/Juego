@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Un pequeño juego</title>
 
 <style>
@@ -13,44 +13,52 @@ body{
     font-family:Arial;
     color:white;
     text-align:center;
+    overflow:hidden;
 }
 
-canvas{
-    display:block;
-    margin:auto;
+h3{
+    margin:10px 0 5px 0;
+    font-size:18px;
+}
+
+#juego{
     background:#050510;
     border:2px solid #444;
+    display:block;
+    margin:auto;
 }
 
+/* MENSAJE */
 #mensaje{
     position:fixed;
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    font-size:24px;
+    font-size:20px;
     display:none;
-    background:rgba(0,0,0,0.8);
-    padding:20px;
-    border-radius:10px;
+    background:rgba(0,0,0,0.85);
+    padding:18px;
+    border-radius:12px;
+    width:80%;
 }
 
-/* Controles táctiles */
+/* CONTROLES */
 #controles{
     position:fixed;
-    bottom:20px;
+    bottom:10px;
     width:100%;
     display:flex;
     justify-content:center;
-    gap:10px;
+    gap:12px;
 }
 
 .boton{
-    width:70px;
-    height:70px;
+    width:60px;
+    height:60px;
     background:#222;
     color:white;
-    font-size:26px;
-    border-radius:15px;
+    font-size:24px;
+    border-radius:14px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -68,39 +76,49 @@ canvas{
 <body>
 
 <h3>Llega hasta el corazón ❤️</h3>
-<canvas id="juego" width="600" height="400"></canvas>
+<canvas id="juego"></canvas>
 
 <div id="mensaje">
-    ❤️<br><br>
-    Si llegaste hasta aquí…<br>
-    es porque quería que encontraras esto:<br><br>
-    Me gustas muchísimo.
+❤️<br><br>
+Si encontraste esto…<br>
+era lo que quería decirte desde hace tiempo:<br><br>
+Me gustas mucho.
 </div>
 
 <div id="controles">
-    <div class="boton" id="up">↑</div>
-    <div class="boton" id="left">←</div>
-    <div class="boton" id="down">↓</div>
-    <div class="boton" id="right">→</div>
+<div class="boton" id="left">←</div>
+<div class="boton" id="up">↑</div>
+<div class="boton" id="down">↓</div>
+<div class="boton" id="right">→</div>
 </div>
 
 <script>
-const canvas = document.getElementById("juego");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("juego");
+const ctx=canvas.getContext("2d");
 
-let jugador = {x:50,y:180,size:20,speed:4};
-let corazon = {x:520,y:180,size:20};
+/* TAMAÑO ADAPTABLE AL CELULAR */
+function resize(){
+    canvas.width=window.innerWidth*0.95;
+    canvas.height=window.innerHeight*0.55;
+}
+resize();
+window.addEventListener("resize",resize);
 
+let jugador={x:20,y:100,size:20,speed:4};
+let corazon={x:300,y:150,size:20};
 let keys={};
 
-// teclado PC
+/* TECLADO PC */
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-// controles táctiles
+/* CONTROLES TÁCTILES */
 function touch(id,key){
     const btn=document.getElementById(id);
-    btn.addEventListener("touchstart",()=>keys[key]=true);
+    btn.addEventListener("touchstart",e=>{
+        e.preventDefault();
+        keys[key]=true;
+    });
     btn.addEventListener("touchend",()=>keys[key]=false);
 }
 
@@ -109,6 +127,7 @@ touch("down","ArrowDown");
 touch("left","ArrowLeft");
 touch("right","ArrowRight");
 
+/* MOVIMIENTO */
 function mover(){
     if(keys["ArrowUp"]) jugador.y-=jugador.speed;
     if(keys["ArrowDown"]) jugador.y+=jugador.speed;
@@ -121,38 +140,44 @@ function mover(){
     if(jugador.y>canvas.height-jugador.size) jugador.y=canvas.height-jugador.size;
 }
 
+/* DIBUJAR */
 function dibujarJugador(){
     ctx.fillStyle="cyan";
     ctx.fillRect(jugador.x,jugador.y,jugador.size,jugador.size);
 }
 
 function dibujarCorazon(){
+    corazon.x=canvas.width-40;
+    corazon.y=canvas.height/2;
+
     ctx.fillStyle="red";
     ctx.beginPath();
     ctx.arc(corazon.x,corazon.y,10,0,Math.PI*2);
     ctx.fill();
 }
 
+/* COLISIÓN */
 function colision(){
-    return(
-        jugador.x<corazon.x+10 &&
-        jugador.x+jugador.size>corazon.x-10 &&
-        jugador.y<corazon.y+10 &&
-        jugador.y+jugador.size>corazon.y-10
-    );
+return(
+jugador.x<corazon.x+10 &&
+jugador.x+jugador.size>corazon.x-10 &&
+jugador.y<corazon.y+10 &&
+jugador.y+jugador.size>corazon.y-10
+);
 }
 
+/* LOOP */
 function juego(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    mover();
-    dibujarJugador();
-    dibujarCorazon();
+ctx.clearRect(0,0,canvas.width,canvas.height);
+mover();
+dibujarJugador();
+dibujarCorazon();
 
-    if(colision()){
-        document.getElementById("mensaje").style.display="block";
-    }
+if(colision()){
+document.getElementById("mensaje").style.display="block";
+}
 
-    requestAnimationFrame(juego);
+requestAnimationFrame(juego);
 }
 juego();
 </script>
