@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Un pequeño juego</title>
+
+<style>
+    body{
+        margin:0;
+        background:black;
+        overflow:hidden;
+        font-family:Arial;
+        color:white;
+        text-align:center;
+    }
+
+    canvas{
+        display:block;
+        margin:auto;
+        background:#050510;
+        border:2px solid #444;
+    }
+
+    #mensaje{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        font-size:28px;
+        display:none;
+    }
+</style>
+
+</head>
+
+<body>
+
+<h2>Usa las flechas del teclado ↑ ↓ ← →</h2>
+<canvas id="juego" width="600" height="400"></canvas>
+
+<div id="mensaje">
+    ❤️<br><br>
+    Me gustas mucho<br>
+    ademas que me haces tan feliz<br>
+    que hice este jueguito en lo que ibas a cenar<br>
+    a demas con el tiempo lo ire mejorando<br>
+</div>
+
+<script>
+
+const canvas = document.getElementById("juego");
+const ctx = canvas.getContext("2d");
+
+let jugador = {
+    x:50,
+    y:180,
+    size:20,
+    speed:4
+};
+
+let corazon = {
+    x:520,
+    y:180,
+    size:20
+};
+
+let keys = {};
+
+document.addEventListener("keydown", e => keys[e.key]=true);
+document.addEventListener("keyup", e => keys[e.key]=false);
+
+function mover(){
+    if(keys["ArrowUp"]) jugador.y -= jugador.speed;
+    if(keys["ArrowDown"]) jugador.y += jugador.speed;
+    if(keys["ArrowLeft"]) jugador.x -= jugador.speed;
+    if(keys["ArrowRight"]) jugador.x += jugador.speed;
+
+    // límites pantalla
+    if(jugador.x<0) jugador.x=0;
+    if(jugador.y<0) jugador.y=0;
+    if(jugador.x>canvas.width-jugador.size) jugador.x=canvas.width-jugador.size;
+    if(jugador.y>canvas.height-jugador.size) jugador.y=canvas.height-jugador.size;
+}
+
+function dibujarJugador(){
+    ctx.fillStyle="cyan";
+    ctx.fillRect(jugador.x,jugador.y,jugador.size,jugador.size);
+}
+
+function dibujarCorazon(){
+    ctx.fillStyle="red";
+    ctx.beginPath();
+    ctx.arc(corazon.x, corazon.y, 10, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function colision(){
+    return(
+        jugador.x < corazon.x+10 &&
+        jugador.x+jugador.size > corazon.x-10 &&
+        jugador.y < corazon.y+10 &&
+        jugador.y+jugador.size > corazon.y-10
+    );
+}
+
+function juego(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    mover();
+    dibujarJugador();
+    dibujarCorazon();
+
+    if(colision()){
+        document.getElementById("mensaje").style.display="block";
+    }
+
+    requestAnimationFrame(juego);
+}
+
+juego();
+
+</script>
+
+</body>
+</html>
